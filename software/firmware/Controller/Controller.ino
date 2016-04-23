@@ -9,12 +9,38 @@
 #include <ESP8266WebServer.h>
 #include <WebSocketsServer.h>   // https://github.com/Links2004/arduinoWebSockets/
 #include <Hash.h>
+#include <Ticker.h>
 #include <RobotWifi.h>
 #include "Webpages.h"
+
+#define PIN_LED 2
+Ticker led;
 
 RobotWifi robotWifi;
 ESP8266WebServer webserver(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
+
+void ledTick()
+{
+  digitalWrite(PIN_LED, !digitalRead(PIN_LED));
+}
+
+void ledBlink(int intervalMs)
+{
+  led.attach_ms(intervalMs, ledTick);
+}
+
+void ledOff()
+{
+  led.detach();
+  digitalWrite(PIN_LED, LOW);
+}
+
+void ledOn()
+{
+  led.detach();
+  digitalWrite(PIN_LED, HIGH);
+}
 
 static void handleRoot()
 {
@@ -78,6 +104,9 @@ void setup()
   Serial.println();
   Serial.println("Robot Remote - Controller");
   Serial.setTimeout(200);
+  
+  pinMode(PIN_LED, OUTPUT);
+  ledBlink(500);
 
   // Setup as the Robot Remote host.
   robotWifi.host();
@@ -93,6 +122,8 @@ void setup()
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
   Serial.println("Websocket server started");
+
+  ledOn();
 }
 
 void loop() 
@@ -102,7 +133,9 @@ void loop()
   // Read input from serial and post out to websocket clients
   String line = Serial.readStringUntil('\n');
   if (line.length() > 0) {
+    ledOff();
     webSocket.broadcastTXT("[js]" + line);
+    ledOn();
   }
 }
 
