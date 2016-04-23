@@ -1,22 +1,20 @@
 /*
- * WebSocketClient.ino
- *
- *  Created on: 24.05.2015
- *
+ * RobotRemote - SerialClient
+ * 
+ * Simple serial client that pushes data back out over serial
+ * 
  */
-
+ 
 #include <Arduino.h>
 
 #include <ESP8266WiFi.h>
-#include <ESP8266WiFiMulti.h>
-
-#include <WebSocketsClient.h>
-
+#include <WebSocketsClient.h>   // https://github.com/Links2004/arduinoWebSockets/
 #include <Hash.h>
 
-ESP8266WiFiMulti WiFiMulti;
-WebSocketsClient webSocket;
+#include <RobotWifi.h>
 
+RobotWifi robotWifi;
+WebSocketsClient webSocket;
 
 #define USE_SERIAL Serial
 
@@ -53,7 +51,6 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t lenght) {
 }
 
 void setup() {
-    // USE_SERIAL.begin(921600);
     USE_SERIAL.begin(115200);
 
     //Serial.setDebugOutput(true);
@@ -63,23 +60,11 @@ void setup() {
     USE_SERIAL.println();
     USE_SERIAL.println();
 
-      for(uint8_t t = 4; t > 0; t--) {
-          USE_SERIAL.printf("[SETUP] BOOT WAIT %d...\n", t);
-          USE_SERIAL.flush();
-          delay(1000);
-      }
+    robotWifi.join();
 
-    WiFiMulti.addAP("ESP2000", "1qaz2wsx3edc4rfv");
-
-    //WiFi.disconnect();
-    while(WiFiMulti.run() != WL_CONNECTED) {
-        delay(100);
-    }
-
-    webSocket.begin("192.168.0.163", 81);
+    webSocket.begin("192.168.4.1", 81);
     //webSocket.setAuthorization("user", "Password"); // HTTP Basic Authorization
     webSocket.onEvent(webSocketEvent);
-
 }
 
 void loop() {

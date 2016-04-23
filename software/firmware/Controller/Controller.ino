@@ -1,21 +1,21 @@
 /*
-   WebSocketServer.ino
-
-    Created on: 22.05.2015
-
-*/
-
+ * RobotRemote - Controller
+ * 
+ * Firmware for a RobotRemote controller
+ * 
+ */
+ 
 #include <Arduino.h>
 
 #include <ESP8266WiFi.h>
-#include <WebSocketsServer.h>   //https://github.com/Links2004/arduinoWebSockets/tree/async
+#include <WebSocketsServer.h>   // https://github.com/Links2004/arduinoWebSockets/
 #include <Hash.h>
 
-#include <DNSServer.h>
 #include <ESP8266WebServer.h>
-#include <WiFiManager.h>        //https://github.com/tzapu/WiFiManager
+#include <RobotWifi.h>
 
 WebSocketsServer webSocket = WebSocketsServer(81);
+RobotWifi robotWifi;
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght) {
 
@@ -62,24 +62,8 @@ void setup() {
   Serial.println();
   Serial.println();
   
-  //WiFiManager
-  //Local intialization. Once its business is done, there is no need to keep it around
-  WiFiManager wifiManager;
-
-  //reset settings - for testing
-  //wifiManager.resetSettings();
-
-
-  //tries to connect to last known settings
-  //if it does not connect it starts an access point with the specified name
-  //here  "AutoConnectAP" with password "password"
-  //and goes into a blocking loop awaiting configuration
-  if (!wifiManager.autoConnect("AutoConnectAP", "password")) {
-    Serial.println("failed to connect, we should reset as see if it connects");
-    delay(3000);
-    ESP.reset();
-    delay(5000);
-  }
+  //RobotWifi
+  robotWifi.host();
 
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
