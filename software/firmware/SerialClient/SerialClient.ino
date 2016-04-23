@@ -6,67 +6,50 @@
  */
  
 #include <Arduino.h>
-
 #include <ESP8266WiFi.h>
 #include <WebSocketsClient.h>   // https://github.com/Links2004/arduinoWebSockets/
 #include <Hash.h>
-
 #include <RobotWifi.h>
 
 RobotWifi robotWifi;
 WebSocketsClient webSocket;
 
-#define USE_SERIAL Serial
-
-void webSocketEvent(WStype_t type, uint8_t * payload, size_t lenght) {
-
-
+void webSocketEvent(WStype_t type, uint8_t * payload, size_t len) 
+{
     switch(type) {
         case WStype_DISCONNECTED:
-            USE_SERIAL.printf("[WSc] Disconnected!\n");
+            Serial.printf("[WSc]Disconnected\n");
             break;
+            
         case WStype_CONNECTED:
-            {
-                USE_SERIAL.printf("[WSc] Connected to url: %s\n",  payload);
-				
-			    // send message to server when Connected
-				webSocket.sendTXT("Connected");
-            }
+            Serial.printf("[WSc]Connected\n");
             break;
+            
         case WStype_TEXT:
-            USE_SERIAL.printf("[WSc] get text: %s\n", payload);
-
-			// send message to server
-			// webSocket.sendTXT("message here");
+            Serial.printf("[WSc]%s\n", payload);
             break;
+            
         case WStype_BIN:
-            USE_SERIAL.printf("[WSc] get binary lenght: %u\n", lenght);
-            hexdump(payload, lenght);
-
-            // send data to server
-            // webSocket.sendBIN(payload, lenght);
+            Serial.printf("[WSc] get binary length: %u\n", len);
+            hexdump(payload, len);
             break;
     }
-
 }
 
 void setup() {
-    USE_SERIAL.begin(115200);
-
-    //Serial.setDebugOutput(true);
-    USE_SERIAL.setDebugOutput(false);
-
-    USE_SERIAL.println();
-    USE_SERIAL.println();
-    USE_SERIAL.println();
+    Serial.begin(115200);
+    Serial.setDebugOutput(false);
+    Serial.println();
+    Serial.println();
+    Serial.println("Robot Remote - Serial Client");
 
     robotWifi.join();
+    Serial.println("Connected to wifi");
 
     webSocket.begin("192.168.4.1", 81);
-    //webSocket.setAuthorization("user", "Password"); // HTTP Basic Authorization
     webSocket.onEvent(webSocketEvent);
 }
 
 void loop() {
-    //webSocket.loop();
+    
 }
