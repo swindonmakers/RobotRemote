@@ -8,15 +8,38 @@
 #include <Arduino.h>
 
 #include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+
 #include <WebSocketsServer.h>   // https://github.com/Links2004/arduinoWebSockets/
 #include <Hash.h>
 
-#include <ESP8266WebServer.h>
 #include <RobotWifi.h>
+#include "Webpages.h"
 
 RobotWifi robotWifi;
+ESP8266WebServer webserver(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
+static void handleRoot()
+{
+  webserver.send(200, F("text/html"), pageWebSocketMonitor);
+}
+
+static void handleNotFound()
+{
+  String message = "File Not Found\n\n";
+  message += "URI: ";
+  message += webserver.uri();
+  message += "\nMethod: ";
+  message += (webserver.method() == HTTP_GET)?"GET":"POST";
+  message += "\nArguments: ";
+  message += webserver.args();
+  message += "\n";
+  for (uint8_t i=0; i<webserver.args(); i++){
+    message += " " + webserver.argName(i) + ": " + webserver.arg(i) + "\n";
+  }
+  webserver.send(404, F("text/plain"), message);
+}
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t len)
 {
@@ -64,13 +87,22 @@ void setup()
   robotWifi.host();
   Serial.println("Wifi AP started");
 
+  // Start web server
+  webserver.on("/", handleRoot);
+  webserver.onNotFound(handleNotFound);
+  webserver.begin();
+  Serial.println("Webserver started");
+
   // Start a websocket server
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
+  Serial.println("Websocket server started");
 }
 
 void loop() 
 {
+  webserver.handleClient();
+  
   // Read input from serial and post out to websocket clients
   String line = Serial.readStringUntil('\n');
   if (line.length() > 0) {
