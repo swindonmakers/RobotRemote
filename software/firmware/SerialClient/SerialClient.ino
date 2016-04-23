@@ -1,11 +1,10 @@
 /*
- * RobotRemote - SerialClient
+ * Robot Remote - Serial Client
  * 
  * Simple serial client that pushes data back out over serial
  * 
  */
- 
-#include <Arduino.h>
+
 #include <ESP8266WiFi.h>
 #include <WebSocketsClient.h>   // https://github.com/Links2004/arduinoWebSockets/
 #include <Hash.h>

@@ -1,18 +1,14 @@
 /*
- * RobotRemote - Controller
+ * Robot Remote - Controller
  * 
- * Firmware for a RobotRemote controller
+ * Firmware for a Robot Remote controller
  * 
  */
  
-#include <Arduino.h>
-
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-
 #include <WebSocketsServer.h>   // https://github.com/Links2004/arduinoWebSockets/
 #include <Hash.h>
-
 #include <RobotWifi.h>
 #include "Webpages.h"
 
