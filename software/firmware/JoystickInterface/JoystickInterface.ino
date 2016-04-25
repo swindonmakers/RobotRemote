@@ -27,8 +27,10 @@
  */
 
 #include <LiquidCrystal.h>
+#include <NewPing.h>
 
 LiquidCrystal lcd(4, 5, 9, 8, 7 ,6);
+NewPing sonar(10, 11, 30);
 
 int interval=100;
 
@@ -48,7 +50,7 @@ void setup() {
   Serial.begin(115200);
   pinMode(2, INPUT);
   pinMode(3, INPUT);
-  lcd.begin(16,2);
+  lcd.begin(20,2);
   lcd.print("Lobstacle Challenge");
   lcd.setCursor(0,1);
   lcd.print("Press fire to go...");
@@ -79,6 +81,7 @@ void loop() {
       Serial.print(b1);
       Serial.print(",");
       Serial.println(b2);
+
     }
     else {
       if (b1 == 1) { // go!
@@ -103,6 +106,30 @@ void loop() {
       }
     }
 
+  }
+
+  if (inRun) {
+    // Read Sonar
+    int dist = sonar.ping_cm();
+    lcd.setCursor(8, 0);
+    lcd.print("        ");
+    lcd.setCursor(8, 0);
+    lcd.print("Dist: ");
+    if (dist > 0) {
+      lcd.print(dist);
+      if (dist <= 10) {
+        // close enough
+        // Stop run
+        inRun = false;
+        // Stop Logobot
+        Serial.println("500,500,0,0");
+        // Update LCD
+        lcd.setCursor(0,0);
+        lcd.print("HOME!");
+      }
+    } else {
+      lcd.print("-");
+    }
   }
 
   if (inRun && millis() - lastLcdUpdate > 1000) {
